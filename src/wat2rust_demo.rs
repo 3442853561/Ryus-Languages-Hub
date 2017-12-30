@@ -1,9 +1,8 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-static KEY_WORD: &'static [&'static str] = &[
-    "module", "func", "param", "local", "result", "export", "call"
-];
+static KEY_WORD: &'static [&'static str] = &["module", "func", "param", "local", "result",
+                                             "export", "call"];
 
 static TYPE: &'static [&'static str] = &["i32", "i64", "f32", "f64"];
 static FUNC_FOR_TYPE_CLASS: &'static [&'static str] = &["add"];
@@ -44,12 +43,21 @@ fn is_ident(code: String) -> Option<Expr> {
     if !_code.starts_with("$") {
         return None;
     }
-    for i in _code.chars() {
-        // match i {
-        
-        // }
+    let mut result = "_".to_string();
+    for (index, i) in _code.chars().enumerate() {
+        if index == 0 {
+            continue;
+        }
+        match i {
+            '0'...'9' => result.push(i),
+            'a'...'z' | 'A'...'Z' => result.push(i),
+            '_' | '-' => result.push(i),
+            '*' | '/' | '\\' | '^' | '~' | '.' | '+' | '=' | '<' | '>' | '!' | '?' | '@' |
+            '#' | '$' | '%' | '\'' | '&' | '|' | ':' | '`' => return None,
+            _ => return None,
+        }
     }
-    None
+    Some(Expr::Ident(result))
 }
 
 fn is_func(code: String) -> Option<Expr> {
@@ -70,6 +78,37 @@ fn is_func(code: String) -> Option<Expr> {
     None
 }
 
+fn is_number(code: String) -> Option<Expr> {
+    let _code = code.trim();
+    let mut is_float = false;
+    let mut is_negative = false;
+    let mut result = "".to_string();
+    for i in _code.chars() {
+        match i {
+            '0'...'9' => {}
+            '.' => {
+                if is_float {
+                    return None;
+                }
+                is_float = true;
+            }
+            '-' => {
+                if is_negative {
+                    return None;
+                }
+                is_negative = true;
+            }
+            _ => return None,
+        }
+        result.push(i);
+    }
+    Some(if is_float {
+             Expr::Float(result.parse::<f64>().unwrap())
+         } else {
+             Expr::Integer(result.parse::<i64>().unwrap())
+         })
+}
+
 fn get_token(code: String) -> Option<Vec<Expr>> {
     None
 }
@@ -83,4 +122,7 @@ fn main() {
     println!("{:?}", is_type("i32".to_string()));
     println!("{:?}", is_func("get_local".to_string()));
     println!("{:?}", is_func("i32.add".to_string()));
+    println!("{:?}", is_ident("$123".to_string()));
+    println!("{:?}", is_number("-123".to_string()));
+    println!("{:?}", is_number("-12.3".to_string()));
 }
