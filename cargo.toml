@@ -1,0 +1,8 @@
+[package]
+name = "Ryus-Languages-Hub"
+version = "0.0.1"
+authors = ["3442853561"]
+
+[[bin]]
+name = "wat2rust_demo"
+path = "./src/wat2rust_demo.rs"
