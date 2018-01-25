@@ -1,8 +1,10 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-static KEY_WORD: &'static [&'static str] = &["module", "func", "param", "local", "result",
-                                             "export", "call"];
+static KEY_WORD: &'static [&'static str] = &[
+    "module", "func", "param", "local", "result",
+    "export", "call"
+];
 
 static TYPE: &'static [&'static str] = &["i32", "i64", "f32", "f64"];
 static FUNC_FOR_TYPE_CLASS: &'static [&'static str] = &["add"];
@@ -13,14 +15,14 @@ static FUNC: &'static [&'static str] = &["get_local"];
 pub enum Expr {
     Key(String),
     Type(String),
-    Ident(String),
+    Ident(String, bool),
     Func(Option<String>, String),
     Integer(i64),
     Float(f64),
     Child(Vec<Expr>),
 }
 
-fn is_key(code: String) -> Option<Expr> {
+pub fn is_key(code: String) -> Option<Expr> {
     for i in KEY_WORD.iter() {
         if &*code.trim() == *i {
             return Some(Expr::Key(i.to_string()));
@@ -29,7 +31,7 @@ fn is_key(code: String) -> Option<Expr> {
     None
 }
 
-fn is_type(code: String) -> Option<Expr> {
+pub fn is_type(code: String) -> Option<Expr> {
     for i in TYPE.iter() {
         if &*code.trim() == *i {
             return Some(Expr::Type(i.to_string()));
@@ -38,12 +40,13 @@ fn is_type(code: String) -> Option<Expr> {
     None
 }
 
-fn is_ident(code: String) -> Option<Expr> {
+pub fn is_ident(code: String) -> Option<Expr> {
     let _code = code.trim();
     if !_code.starts_with("$") {
         return None;
     }
     let mut result = "_".to_string();
+	let mut flag = false;
     for (index, i) in _code.chars().enumerate() {
         if index == 0 {
             continue;
@@ -53,14 +56,14 @@ fn is_ident(code: String) -> Option<Expr> {
             'a'...'z' | 'A'...'Z' => result.push(i),
             '_' | '-' => result.push(i),
             '*' | '/' | '\\' | '^' | '~' | '.' | '+' | '=' | '<' | '>' | '!' | '?' | '@' |
-            '#' | '$' | '%' | '\'' | '&' | '|' | ':' | '`' => return None,
+            '#' | '$' | '%' | '\'' | '&' | '|' | ':' | '`' => {result.push(i); flag = true;}
             _ => return None,
         }
     }
-    Some(Expr::Ident(result))
+    Some(Expr::Ident(result, flag))
 }
 
-fn is_func(code: String) -> Option<Expr> {
+pub fn is_func(code: String) -> Option<Expr> {
     // is global function
     for i in FUNC.iter() {
         if &*code.trim() == *i {
@@ -78,7 +81,7 @@ fn is_func(code: String) -> Option<Expr> {
     None
 }
 
-fn is_number(code: String) -> Option<Expr> {
+pub fn is_number(code: String) -> Option<Expr> {
     let _code = code.trim();
     let mut is_float = false;
     let mut is_negative = false;
@@ -107,22 +110,4 @@ fn is_number(code: String) -> Option<Expr> {
          } else {
              Expr::Integer(result.parse::<i64>().unwrap())
          })
-}
-
-fn get_token(code: String) -> Option<Vec<Expr>> {
-    None
-}
-
-fn wat2rust(code: String) -> Option<String> {
-    None
-}
-
-fn main() {
-    println!("{:?}", is_key("func".to_string()));
-    println!("{:?}", is_type("i32".to_string()));
-    println!("{:?}", is_func("get_local".to_string()));
-    println!("{:?}", is_func("i32.add".to_string()));
-    println!("{:?}", is_ident("$123".to_string()));
-    println!("{:?}", is_number("-123".to_string()));
-    println!("{:?}", is_number("-12.3".to_string()));
 }

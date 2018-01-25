@@ -5,4 +5,8 @@ authors = ["3442853561"]
 
 [[bin]]
 name = "wat2rust_demo"
-path = "./src/wat2rust_demo.rs"
+path = "./src/wat2rust/demo.rs"
+
+[[bin]]
+name = "rscript"
+path = "./src/ryusscript/demo.rs"
